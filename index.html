@@ -50,6 +50,8 @@ body.dpshake .wrap,body.dpshake main{animation:dpshake .5s 4}@keyframes dpshake{
 .helpwanted{display:inline-block;font-family:var(--display);font-weight:900;font-size:30px;background:#f2b632;color:#1b1404;padding:6px 18px;border-radius:6px;transform:rotate(-4deg);margin:8px 0;animation:rwslam .5s both}
 .holyball{font-size:72px;animation:rwpop 1.4s both,rwpulse 1.4s infinite}.divinetitle2{font-family:var(--display);font-weight:900;font-size:30px;color:#ffe08a;animation:rwpulse 1s infinite}
 @media (prefers-reduced-motion:reduce){.streakbox,.wheelwrap.lv3,.wheelwrap.lv4,.lvbig,.holyball,.divinetitle2{animation:none!important}}
+body.insetup .wheelwrap{max-height:0;overflow:hidden;opacity:0;pointer-events:none;margin:0;padding:0}body.insetup #streakBox{display:none}
+.btns.col{display:grid;grid-template-columns:1fr}.btns.col .btn{min-height:52px;text-align:left}
 </style></head><body>
 <title>NFL Position Spinner</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -327,8 +329,8 @@ body[data-track="bless"] .cquote{color:#cfe2ff!important}
   <p class="rules">Offense and defense each get 47.5% of the first wheel and special teams gets 5%. Positions inside a side have even odds. A picked position sits out on that wheel (winner or loser) for the next 10 spins, then comes back.</p>
   <div id="rwBox" class="rwbox"></div>
   <div id="dpBox" class="rwbox"></div>
-  <p class="rules"><b>Defeat Punishments:</b> every loss spins this wheel first, then the normal Loser Wheel. Draft Pick 25%, Free Agent Disaster 20%, Player Stolen 10%, Attribute Downgrade 15%, Trade Disaster 10%, Lose Protection 10%, Development Regression 5%, Disaster Jackpot 5%. Extra punishment spins never count as losses or change your streak.</p>
-  <p class="rules"><b>Victory Rewards:</b> every win spins this wheel first, then the normal Win Wheel. Draft Pick 25%, Free Agent 20%, Steal a Player 10%, Attribute Upgrade 15%, Trade Override 10%, Player Protection 10%, Development Upgrade 5%, Jackpot 5%. Extra reward spins never count as wins or change your streak.</p>
+  <p class="rules"><b>Defeat Punishments:</b> every loss spins this wheel and you get one outcome: Loser Wheel Player 30% (spin the normal Loser Wheel), Draft Pick 17.5%, Free Agent Disaster 14%, Attribute Downgrade 10.5%, Player Stolen 7%, Trade Disaster 7%, Lose Protection 7%, Development Regression 3.5%, Disaster Jackpot 3.5%. Every loss counts once toward your streak, whatever the outcome.</p>
+  <p class="rules"><b>Victory Rewards:</b> every win spins this wheel and you get one outcome: Win Wheel Player 30% (spin the normal Win Wheel), Draft Pick 17.5%, Free Agent 14%, Attribute Upgrade 10.5%, Steal a Player 7%, Trade Override 7%, Player Protection 7%, Development Upgrade 3.5%, Jackpot 3.5%. Every win counts once toward your streak, whatever the outcome.</p>
   <p class="rules"><b>Hot Streak Curse:</b> streaks keep counting until you lose. Wins 3, 5, 7 and 10 (then every 3 after: 13, 16, 19) each trigger a curse right after your Win Wheel pick, getting harsher at each level (level 4 is the max). Each milestone fires once per streak. A loss resets the win streak.</p>
   <p class="rules"><b>Losing Streak Blessing:</b> losses 3, 5, 7 and 10 (then every 3 after) each trigger a bigger comeback miracle right after your Loser Wheel pick (level 4 is the max). Each milestone fires once per streak. A win resets the loss streak.</p>
 </div>
@@ -403,26 +405,28 @@ const levelOf=n=>n>=10?4:n>=7?3:n>=5?2:1;
 const nextMs=n=>n<3?3:n<5?5:n<7?7:n<10?10:10+3*(Math.floor((n-10)/3)+1);
 const prevMs=n=>n<3?0:n<5?3:n<7?5:n<10?7:10+3*Math.floor((n-10)/3);
 const RW={
- draft:{icon:"🎟️",name:"Draft Pick",short:"DRAFT PICK",w:25,color:"#2f7de1",say:"THE FUTURE IS YOURS!"},
- fa:{icon:"💰",name:"Sign a Free Agent",short:"FREE AGENT",w:20,color:"#1f9d6b",say:"WELCOME TO THE TEAM!"},
- steal:{icon:"🏴‍☠️",name:"Steal a Player",short:"STEAL",w:10,color:"#c0392b",say:"GRAND THEFT FOOTBALL!"},
- attr:{icon:"💪",name:"Attribute Upgrade",short:"UPGRADE",w:15,color:"#e67e22",say:"TIME TO HIT THE GYM!"},
- trade:{icon:"🔄",name:"Trade Override",short:"TRADE",w:10,color:"#8e44ad",say:"THE GM HAS SPOKEN!"},
- shield:{icon:"🛡️",name:"Player Protection",short:"SHIELD",w:10,color:"#2980b9",say:"NOT TODAY!"},
- dev:{icon:"⭐",name:"Development Upgrade",short:"⭐",w:5,color:"#9b59b6",say:"A STAR IS BORN!"},
- jackpot:{icon:"👑",name:"Jackpot: Choose Your Reward",short:"👑",w:5,color:"#f2b632",ink:"#1b1404",say:"THE FOOTBALL GODS HAVE SPOKEN!"}};
+ ww:{icon:"🏈",name:"Win Wheel Player",short:"WIN WHEEL",w:30,color:"#d4a017",ink:"#1b1404",say:"TIME TO PICK YOUR PLAYER!"},
+ draft:{icon:"🎟️",name:"Draft Pick",short:"DRAFT PICK",w:17.5,color:"#2f7de1",say:"THE FUTURE IS YOURS!"},
+ fa:{icon:"💰",name:"Sign a Free Agent",short:"FREE AGENT",w:14.0,color:"#1f9d6b",say:"WELCOME TO THE TEAM!"},
+ steal:{icon:"🏴‍☠️",name:"Steal a Player",short:"STEAL",w:7.0,color:"#c0392b",say:"GRAND THEFT FOOTBALL!"},
+ attr:{icon:"💪",name:"Attribute Upgrade",short:"UPGRADE",w:10.5,color:"#e67e22",say:"TIME TO HIT THE GYM!"},
+ trade:{icon:"🔄",name:"Trade Override",short:"TRADE",w:7.0,color:"#8e44ad",say:"THE GM HAS SPOKEN!"},
+ shield:{icon:"🛡️",name:"Player Protection",short:"SHIELD",w:7.0,color:"#2980b9",say:"NOT TODAY!"},
+ dev:{icon:"⭐",name:"Development Upgrade",short:"⭐",w:3.5,color:"#9b59b6",say:"A STAR IS BORN!"},
+ jackpot:{icon:"👑",name:"Jackpot: Choose Your Reward",short:"👑",w:3.5,color:"#f2b632",ink:"#1b1404",say:"THE FOOTBALL GODS HAVE SPOKEN!"}};
 const RWK=Object.keys(RW),RWROUNDS=[2,5,8,12,18,25,30],RWDEV=["Normal","Star","Superstar","X-Factor"];
 const RWSTEPS=["rwSpin","rwAnn","rwSpin2","rwCat","rwPos","rwCount","rwNum","rwForm","rwJack","rwFinal"];
 const DPSTEPS=["dpSpin","dpAnn","dpSpin2","dpHave","dpCat","dpPos","dpCount","dpNum","dpForm","dpShield","dpJack","dpFinal","dpManual"];
 const DP={
- draft:{icon:"🎟️",name:"Lose a Draft Pick",short:"DRAFT PICK",w:25,color:"#b3202a",say:"THE FUTURE JUST GOT WORSE!",msg:"YOUR FUTURE JUST WENT UP IN FLAMES!"},
- fa:{icon:"💰",name:"Free Agent Disaster",short:"RELEASE",w:20,color:"#3b3f46",say:"PACK YOUR BAGS!",msg:"YOU'RE FIRED!"},
- steal:{icon:"🏴‍☠️",name:"Player Gets Stolen",short:"STOLEN",w:10,color:"#7d1620",say:"YOU JUST GOT ROBBED!",msg:"THANKS FOR THE FREE PLAYER!"},
- attr:{icon:"📉",name:"Attribute Downgrade",short:"DOWNGRADE",w:15,color:"#59606b",say:"SOMEONE FORGOT HOW TO PLAY FOOTBALL!",msg:"CONGRATULATIONS, YOU GOT WORSE!"},
- trade:{icon:"🔄",name:"Trade Disaster",short:"TRADE",w:10,color:"#d12e3a",say:"THE WORST GM IN FOOTBALL!",msg:"WHO LET YOU RUN THIS FRANCHISE?"},
- shield:{icon:"🛡️",name:"Lose Player Protection",short:"SHIELD",w:10,color:"#2a2d33",say:"YOUR SAFETY NET IS GONE!",msg:"NO MORE HIDING BEHIND YOUR SHIELD!"},
- dev:{icon:"⭐",name:"Development Regression",short:"⭐",w:5,color:"#9aa0a8",ink:"#14100a",say:"YOUR STAR IS FALLING!",msg:"SUPER DISAPPOINTMENT!"},
- jackpot:{icon:"☠️",name:"Disaster Jackpot",short:"☠️",w:5,color:"#e03a3a",say:"THE FOOTBALL GODS HAVE ABANDONED YOU!",msg:"YOUR RIVAL GETS TO DECIDE YOUR FATE!"}};
+ lw:{icon:"🎰",name:"Loser Wheel Player",short:"LOSER WHEEL",w:30,color:"#6b0f18",say:"NOW SPIN FOR YOUR VICTIM!",msg:"THE LOSER WHEEL AWAITS."},
+ draft:{icon:"🎟️",name:"Lose a Draft Pick",short:"DRAFT PICK",w:17.5,color:"#b3202a",say:"THE FUTURE JUST GOT WORSE!",msg:"YOUR FUTURE JUST WENT UP IN FLAMES!"},
+ fa:{icon:"💰",name:"Free Agent Disaster",short:"RELEASE",w:14.0,color:"#3b3f46",say:"PACK YOUR BAGS!",msg:"YOU'RE FIRED!"},
+ steal:{icon:"🏴‍☠️",name:"Player Gets Stolen",short:"STOLEN",w:7.0,color:"#7d1620",say:"YOU JUST GOT ROBBED!",msg:"THANKS FOR THE FREE PLAYER!"},
+ attr:{icon:"📉",name:"Attribute Downgrade",short:"DOWNGRADE",w:10.5,color:"#59606b",say:"SOMEONE FORGOT HOW TO PLAY FOOTBALL!",msg:"CONGRATULATIONS, YOU GOT WORSE!"},
+ trade:{icon:"🔄",name:"Trade Disaster",short:"TRADE",w:7.0,color:"#d12e3a",say:"THE WORST GM IN FOOTBALL!",msg:"WHO LET YOU RUN THIS FRANCHISE?"},
+ shield:{icon:"🛡️",name:"Lose Player Protection",short:"SHIELD",w:7.0,color:"#2a2d33",say:"YOUR SAFETY NET IS GONE!",msg:"NO MORE HIDING BEHIND YOUR SHIELD!"},
+ dev:{icon:"⭐",name:"Development Regression",short:"⭐",w:3.5,color:"#9aa0a8",ink:"#14100a",say:"YOUR STAR IS FALLING!",msg:"SUPER DISAPPOINTMENT!"},
+ jackpot:{icon:"☠️",name:"Disaster Jackpot",short:"☠️",w:3.5,color:"#e03a3a",say:"THE FOOTBALL GODS HAVE ABANDONED YOU!",msg:"YOUR RIVAL GETS TO DECIDE YOUR FATE!"}};
 const DPK=Object.keys(DP);
 RWSTEPS.push(...DPSTEPS);
 const dpOn=r=>!!r&&DPSTEPS.includes(r.step);
@@ -443,12 +447,13 @@ function jackRows(C,O,bless){const K=O.count||1,r=[];for(let i=1;i<=K;i++)r.push
 const PNAME = {jordan:"Jordan",sean:"Sean"};
 
 function blank(){return {count:0,cool:{},hist:[]};}
-function blankPlayer(){return {win:blank(),lose:blank(),streak:0,lossStreak:0,curse:null,curseLog:[],rev:0,resetAt:{win:0,lose:0},streakFrom:0,fired:[],runStart:null,spins:{},rewards:{tokens:[],hist:[]},dp:{hist:[],lockUntil:0},week:0};}
+function blankPlayer(){return {win:blank(),lose:blank(),streak:0,lossStreak:0,curse:null,curseLog:[],rev:0,resetAt:{win:0,lose:0},streakFrom:0,fired:[],runStart:null,setup:false,seed:null,newGameAt:0,spins:{},rewards:{tokens:[],hist:[]},dp:{hist:[],lockUntil:0},week:0};}
 /* Every spin is its own record (id, track, pos, slot, at). Counts, cooldowns, history and streaks are
    always rebuilt from those records, so two devices can never overwrite each other's spins. */
 function cleanSpin(e,id){
   if(!e||typeof e!=="object")return null;
   const track=e.track==="win"||e.track==="lose"?e.track:null,pos=String(e.pos||"");
+  if(track&&e.res&&e.id)return {id:String(e.id),track,pos:"",slot:0,label:"",at:+e.at||0,res:1};
   if(!track||!NAME[pos])return null;
   const slot=Math.max(0,+e.slot||0),o={id:String(e.id||id||""),track,pos,slot,label:pos+(slot||""),at:+e.at||0};
   if(!o.id)return null;
@@ -456,9 +461,9 @@ function cleanSpin(e,id){
   return o;
 }
 function derive(o){
-  const all_=Object.values(o.spins||{}).sort((a,b)=>a.at-b.at||(a.id<b.id?-1:1));
+  const all_=Object.values(o.spins||{}).filter(e=>e.at>(o.newGameAt||0)).sort((a,b)=>a.at-b.at||(a.id<b.id?-1:1));
   ["win","lose"].forEach(k=>{
-    const list=all_.filter(e=>e.track===k&&e.at>(o.resetAt[k]||0)),t=blank();
+    const list=all_.filter(e=>e.track===k&&!e.res&&e.at>(o.resetAt[k]||0)),t=blank();
     t.count=list.length;
     list.forEach((e,i)=>{
       t.cool[e.pos]=i+1+COOLDOWN;
@@ -469,7 +474,8 @@ function derive(o){
   });
   let w=0,l=0;
   let last=null,rs=null;
-  all_.filter(e=>!e.curse).forEach(e=>{if(e.track!==last){last=e.track;rs=e.id;}if(e.track==="win"){w++;l=0;}else{l++;w=0;}});
+  if(o.seed&&o.seed.track!=="none"&&o.seed.n>0){last=o.seed.track;rs="seed"+o.seed.at;if(last==="win")w=o.seed.n;else l=o.seed.n;}
+  all_.filter(e=>!e.curse&&e.at>(o.seed?o.seed.at:0)).forEach(e=>{if(e.track!==last){last=e.track;rs=e.id;}if(e.track==="win"){w++;l=0;}else{l++;w=0;}});
   o.streak=w;o.lossStreak=l;o.runStart=rs;
   return o;
 }
@@ -480,10 +486,12 @@ function clean(d){
   o.rev=Math.max(0,+d.rev||0);
   if(d.curse&&typeof d.curse==="object"){const kind=d.curse.kind==="bless"?"bless":"curse";o.curse={kind,level:Math.min(4,Math.max(1,+d.curse.level||1)),n:+d.curse.n||3,type:OPTS[d.curse.type]&&OPTS[d.curse.type].w&&(d.curse.type in (kind==="curse"?CURSE:BLESS)||/^[cb][234]/.test(d.curse.type))?d.curse.type:null,picks:Array.isArray(d.curse.picks)?d.curse.picks:[],chosen:Number.isInteger(d.curse.chosen)?d.curse.chosen:null,short:Math.max(0,+d.curse.short||0),at:+d.curse.at||0};}
   o.curseLog=Array.isArray(d.curseLog)?d.curseLog.slice(0,20):[];
-  o.week=Math.max(0,+d.week||0);o.fired=Array.isArray(d.fired)?d.fired.filter(x=>typeof x==="string").slice(0,60):[];
+  o.week=Math.max(0,+d.week||0);o.setup=!!d.setup;o.newGameAt=+d.newGameAt||0;
+  {const sd=d.seed;o.seed=sd&&typeof sd==="object"&&(sd.track==="win"||sd.track==="lose"||sd.track==="none")?{track:sd.track,n:Math.max(0,Math.min(99,+sd.n||0)),at:+sd.at||0}:null;}o.fired=Array.isArray(d.fired)?d.fired.filter(x=>typeof x==="string").slice(0,60):[];
   const dq=d.dp||{};o.dp={hist:Array.isArray(dq.hist)?dq.hist.filter(h=>h&&DP[h.kind]).slice(0,40):[],lockUntil:Math.max(0,+dq.lockUntil||0)};
   const rw=d.rewards||{};o.rewards={tokens:Array.isArray(rw.tokens)?rw.tokens.filter(t=>t&&RW[t.kind]).slice(0,60):[],hist:Array.isArray(rw.hist)?rw.hist.filter(h=>h&&RW[h.kind]).slice(0,40):[]};
   if(d.spins&&typeof d.spins==="object")Object.keys(d.spins).forEach(id=>{const e=cleanSpin(d.spins[id],id);if(e)o.spins[e.id]=e;});
+  if(Object.keys(o.spins).length)o.setup=true;
   return derive(o);
 }
 function loadLocal(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return {jordan:clean(s.jordan),sean:clean(s.sean)};}catch(e){}return {jordan:blankPlayer(),sean:blankPlayer()};}
@@ -504,7 +512,7 @@ function topOf(p){const h=[];["win","lose"].forEach(k=>{const t=all[p][k];if(t.h
 let canWrite=null;
 const writing={},queued={},remoteIds={jordan:new Set(),sean:new Set()},spinTries={jordan:0,sean:0};
 const NOWRITE="Saved on this device only. This account can't write to the shared board. See the note below.";
-function metaOf(o){return {rev:o.rev,resetAt:o.resetAt,streakFrom:o.streakFrom,curse:o.curse,curseLog:o.curseLog,rewards:o.rewards,dp:o.dp,week:o.week,fired:o.fired};}
+function metaOf(o){return {rev:o.rev,resetAt:o.resetAt,streakFrom:o.streakFrom,curse:o.curse,curseLog:o.curseLog,rewards:o.rewards,dp:o.dp,week:o.week,fired:o.fired,setup:o.setup,seed:o.seed,newGameAt:o.newGameAt};}
 /* meta (curse state, resets) lives in board/<player>; each spin lives in board/<player>/spins/<id> */
 function pushPlayer(p){
   all[p].rev=(all[p].rev||0)+1;
@@ -560,7 +568,7 @@ function refresh(p){
         const inc=clean(snap.data());
         if(inc.rev>=(mine.rev||0)){
           const prevCurse=mine.curse,prevLog=mine.curseLog.length;
-          mine.rev=inc.rev;mine.resetAt=inc.resetAt;mine.streakFrom=inc.streakFrom;mine.curse=inc.curse;mine.curseLog=inc.curseLog;mine.rewards=inc.rewards;mine.dp=inc.dp;mine.week=inc.week;mine.fired=inc.fired;
+          mine.rev=inc.rev;mine.resetAt=inc.resetAt;mine.streakFrom=inc.streakFrom;mine.curse=inc.curse;mine.curseLog=inc.curseLog;mine.rewards=inc.rewards;mine.dp=inc.dp;mine.week=inc.week;mine.fired=inc.fired;mine.setup=inc.setup||mine.setup;mine.seed=inc.seed;mine.newGameAt=inc.newGameAt;
           derive(mine);
           if(!firstMeta&&p!==player){
             if(!prevCurse&&mine.curse)setTimeout(()=>toast(mine.curse&&mine.curse.kind==="bless"?`${PNAME[p]} lost 3 straight. The Losing Streak Blessing is on.`:`${PNAME[p]} won 3 straight. The Hot Streak Curse is on.`),5200);
@@ -654,6 +662,8 @@ function startOver(){return round.curse?"":`<button class="link" data-act="resta
 
 function render(){
   if(rwOn(round)){renderRw();return;}
+  const inSetup=(setupOpen||!S().setup)&&round.step==="wl"&&!S().curse;document.body.classList.toggle("insetup",inSetup);
+  if(inSetup){renderSetup();return;}
   try{evSync(S().curse);}catch(e){}
   const inCurse=!!(round.curse||["poison","curseIntro","cursePick","curseDone"].includes(round.step));
   const EV=S().curse?S().curse.kind:"curse";
@@ -693,9 +703,9 @@ function render(){
       <div class="btns"><button class="btn primary" data-act="spin">Spin</button></div>${startOver()}`;break;
     case "result":
       const lab=round.pos+(round.slot||"");
-      h=`<div class="result"><span class="eyebrow">${PNAME[player]} · ${TRACK_NAME[t]} pick</span><div class="big">${lab}</div>
+      h=`<div class="result"><span class="eyebrow">${PNAME[player]} · ${round.res?(t==="win"?"Win":"Loss")+" recorded":TRACK_NAME[t]+" pick"}</span>${round.res?`<div class="big">${t==="win"?"🏆":"💀"}</div><div class="name">${rwEsc(round.resTitle||"")}</div><div class="meta">${t==="win"?"Reward":"Punishment"} resolved. This game counts once toward your streak.</div>`:`<div class="big">${lab}</div>
       <div class="name">${NAME[round.pos]}${round.slot?" #"+round.slot:""}</div>
-      <div class="meta">${round.cat} · out of the ${TRACK_NAME[t].toLowerCase()} wheel for the next ${COOLDOWN} spins</div></div>
+      <div class="meta">${round.cat} · out of the ${TRACK_NAME[t].toLowerCase()} wheel for the next ${COOLDOWN} spins</div>`}</div>
       ${round.cursed?`<p class="omen">${round.cursed==="bless"?(S().curse?S().curse.n:3)+" straight losses. The room goes quiet\u2026":(S().curse?S().curse.n:3)+" straight wins. Something feels wrong\u2026"}</p>`:`<div class="btns"><button class="btn primary" data-act="next">Continue to next week</button></div><p class="fine">Starts the next round with Win or Lose.</p>`}`;break;
     case "poison":
       h=`<p class="landed">${Ev.name}${(C.level||1)>1?" · LEVEL "+C.level:""}</p><h2>${Ev.wheel}</h2><p class="cquote">“${Ev.wheelQuote}”</p>
@@ -778,6 +788,16 @@ function finish(){
     const C=P.curse;if(!C.picks.some(x=>x.id===round.id))C.picks.push({id:round.id,label:round.pos+(round.slot||""),pos:round.pos,slot:round.slot||0});
     round.step="cursePick";lastTop[player]=topOf(player);render();pushSpin(player);pushPlayer(player);animatePick();return;
   }
+  afterGame();
+}
+function finishResult(){
+  if(round.recorded)return;round.recorded=true;
+  const P=S();if(!round.id)round.id=newId();
+  if(!P.spins[round.id]){const mx=Object.values(P.spins).reduce((m,e)=>Math.max(m,e.at),0);P.spins[round.id]={id:round.id,track:round.track,pos:"",slot:0,label:"",at:Math.max(Date.now(),mx+1),res:1};derive(P);}
+  round.res=true;afterGame();
+}
+function afterGame(){
+  const P=S();
   round.cursed=false;
   {const kind=round.track==="win"?"curse":"bless",n=kind==="curse"?P.streak:P.lossStreak;
    if(msOf(n)){const key=kind+":"+P.runStart+":"+n;
@@ -837,7 +857,8 @@ function rwAct(a,b){
   const w=round.rw;if(!w)return;
   const st=round.step,k=w.kind;
   if(a==="rwgo"&&st==="rwAnn"){
-    if(k==="jackpot")rwGo("rwJack");
+    if(k==="ww")rwStartWheel();
+    else if(k==="jackpot")rwGo("rwJack");
     else if(k==="draft")rwGo("rwSpin2");
     else if(k==="steal"||k==="attr"||k==="dev")rwGo("rwCat");
     else if(k==="trade"){w.result={title:"Trade Override token",detail:"Use it on one trade your game's trade logic would normally reject, if both of you agree and it fits league rules. Save it for a future trade."};round.step="rwFinal";render();rwFx("trade");}
@@ -868,6 +889,13 @@ function rwClaim(){
   const status=(k==="draft"||k==="trade"||k==="shield"||(k==="fa"&&w.fa==="saved"))?"pending":"redeemed";
   if(!w.blocked){R.tokens.unshift({id,kind:k,detail:w.result.title+(w.target?" · "+w.target:""),status,at});R.tokens=R.tokens.slice(0,60);}
   pushPlayer(player);
+  round={id:newId(),recorded:false,step:"cat",track:"win",cat:null,pos:null,n:0,slot:0,curse:false,resTitle:w.result.title};
+  finishResult();renderTokens();
+}
+function rwStartWheel(){
+  const w=round.rw;if(!w||w.claimed)return;w.claimed=true;
+  const R=S().rewards;R.hist.unshift({id:round.id||newId(),kind:"ww",jp:w.jp?1:0,title:"Win Wheel player",detail:"Spin the normal Win Wheel for your player.",at:Date.now()});R.hist=R.hist.slice(0,40);
+  pushPlayer(player);
   round={id:newId(),recorded:false,step:"cat",track:"win",cat:null,pos:null,n:0,slot:0,curse:false};
   setItems(catItems("win"));render();renderTokens();
 }
@@ -883,7 +911,7 @@ function renderRw(){
   const btn=(act,txt,more)=>`<button class="btn primary" data-act="${act}" ${more||""}>${txt}</button>`;
   let h="";
   switch(s){
-    case "rwSpin":h=`<p class="landed">🏆 Victory!</p><h2>Victory Rewards Wheel</h2><p>Spin for a bonus reward first. The normal Win Wheel comes right after.</p><p class="sub">${RWK.map(k=>RW[k].icon+" "+RW[k].w+"%").join(" · ")}</p>`;break;
+    case "rwSpin":h=`<p class="landed">🏆 Victory!</p><h2>Victory Rewards Wheel</h2><p>Spin for your reward. You get one outcome. If it lands on Win Wheel Player, you spin the normal Win Wheel for a player.</p><p class="sub">${RWK.map(k=>RW[k].icon+" "+RW[k].w+"%").join(" · ")}</p>`;break;
     case "rwAnn":h=`<div class="rwicon rw-${w.kind}">${K.icon}</div><h2>${K.say}</h2><p>${w.jp?"Jackpot pick: ":""}${K.name}</p><div class="btns">${btn("rwgo","Continue")}</div>`;break;
     case "rwSpin2":h=`<p class="landed">🎟️ ${K.say}</p><h2>Draft Round Wheel</h2><p>Spin to see which round your extra pick is in.</p><p class="sub">${RWROUNDS.map((p,i)=>"R"+(i+1)+" "+p+"%").join(" · ")}</p>`;break;
     case "rwCat":h=`<p class="landed">${K.icon} ${K.name}</p><h2>${w.kind==="steal"?"Spin for a position to steal":w.kind==="attr"?"Spin for the position to train":"Spin for the position to develop"}</h2><p>Spin the side first, then the position.</p>`;break;
@@ -967,7 +995,8 @@ function dpLanded(it){
 function dpAct(a,b){
   const w=round.rw;if(!w)return;const st=round.step,k=w.kind;
   if(a==="dpgo"&&st==="dpAnn"){
-    if(k==="jackpot"){round.step="dpJack";render();dpFx("jackpot");}
+    if(k==="lw")dpStartWheel();
+    else if(k==="jackpot"){round.step="dpJack";render();dpFx("jackpot");}
     else if(k==="draft")rwGo("dpSpin2");
     else if(k==="shield"){
       const sh=dpShields();w.manual=false;
@@ -978,7 +1007,7 @@ function dpAct(a,b){
     else{w.cat=null;rwGo("dpCat");}
   }
   else if((a==="dppick"||a==="dprand")&&st==="dpJack"){
-    const kk=a==="dprand"?DPK.filter(x=>x!=="jackpot")[Math.floor(Math.random()*7)]:b.dataset.k;
+    const kk=a==="dprand"?(l=>l[Math.floor(Math.random()*l.length)])(DPK.filter(x=>x!=="jackpot")):b.dataset.k;
     if(!DP[kk]||kk==="jackpot")return;w.kind=kk;w.jp=1;round.step="dpAnn";render();dpFx(kk);
   }
   else if(a==="dphave"&&st==="dpHave"){
@@ -1027,8 +1056,15 @@ function dpDone(){
   [w.shieldId,w.saved].forEach(t=>{const x=t&&P.rewards.tokens.find(y=>y.id===t);if(x)x.status="consumed";});
   if(w.lock)D.lockUntil=(P.week||0)+2;
   pushPlayer(player);
+  round={id:newId(),recorded:false,step:"cat",track:"lose",cat:null,pos:null,n:0,slot:0,curse:false,resTitle:w.result.title};
+  finishResult();renderDpBox();renderTokens();
+}
+function dpStartWheel(){
+  const w=round.rw;if(!w||w.done)return;w.done=true;
+  const D=S().dp;D.hist.unshift({id:round.id||newId(),kind:"lw",jp:w.jp?1:0,title:"Loser Wheel player",detail:"Spin the normal Loser Wheel for the player you lose.",note:"",at:Date.now()});D.hist=D.hist.slice(0,40);
+  pushPlayer(player);
   round={id:newId(),recorded:false,step:"cat",track:"lose",cat:null,pos:null,n:0,slot:0,curse:false};
-  setItems(catItems("lose"));render();renderDpBox();renderTokens();
+  setItems(catItems("lose"));render();renderDpBox();
 }
 function renderDp(){
   const s=round.step,w=round.rw||(round.rw={}),K=DP[w.kind]||{};
@@ -1041,7 +1077,7 @@ function renderDp(){
   const conv=w.conv?`<p class="rwmsg">${rwEsc(w.conv)}</p>`:"";
   let h="";
   switch(s){
-    case "dpSpin":h=`<p class="landed">💀 Defeat</p><h2>Defeat Punishments Wheel</h2><p>You have to spin this first. The normal Loser Wheel comes right after.</p><p class="sub">${DPK.map(k=>DP[k].icon+" "+DP[k].w+"%").join(" · ")}</p>`;break;
+    case "dpSpin":h=`<p class="landed">💀 Defeat</p><h2>Defeat Punishments Wheel</h2><p>You have to spin this. You get one outcome. If it lands on Loser Wheel Player, you spin the normal Loser Wheel for the player you lose.</p><p class="sub">${DPK.map(k=>DP[k].icon+" "+DP[k].w+"%").join(" · ")}</p>`;break;
     case "dpAnn":h=`<div class="dpicon dp-${w.kind}">${K.icon}</div><h2>${K.say}</h2><p>${w.jp?"Your rival chose: ":""}${K.name}</p>${conv}<div class="btns">${btn("dpgo","Continue")}</div>`;break;
     case "dpSpin2":h=`<p class="landed">🎟️ ${K.say}</p><h2>Draft Round Punishment Wheel</h2><p>Spin to see which round's pick you lose.${(w.no||[]).length?" Rounds you don't own are off the wheel.":""}</p><p class="sub">${RWROUNDS.map((p,i)=>(w.no||[]).includes(i+1)?"":"R"+(i+1)+" "+p+"%").filter(Boolean).join(" · ")}</p>`;break;
     case "dpHave":h=`<div class="dpicon">🔥</div><h2>Round ${w.round}</h2><p>Do you own a Round ${w.round} pick? If you have several, choose which one to give up.</p><input id="dpPick" class="rwin" maxlength="60" placeholder="Exact pick (e.g. 2027 R${w.round}, own)"><div class="btns">${btn("dphave","Yes, forfeit it",'data-v="yes"')}${btn("dphave","No pick in this round, respin",'data-v="no"')}</div>`;break;
@@ -1072,6 +1108,49 @@ function renderDpBox(){
   el.innerHTML=`<p class="sub">Defeat punishments</p>`+(dpLocked()?`<p class="count">🔒 Protection Lockout active: no earning or using shields until after your next completed week.</p>`:"")
    +(D.hist.length?`<ul class="hist">${D.hist.slice(0,5).map(h=>`<li><span>${DP[h.kind].icon} ${rwEsc(h.title)}${h.jp?" (Jackpot)":""}${h.note?" · "+rwEsc(h.note):""}</span></li>`).join("")}</ul>`:`<p class="empty">No punishments yet.</p>`);
 }
+/* ---------- game setup ---------- */
+let setupOpen=true,suStage="pick",suTrack=null; /* true = the streak question shows every time the page opens */
+function renderSetup(){
+  document.body.dataset.track="win";
+  const chip=document.getElementById("trackChip");chip.hidden=false;chip.textContent=PNAME[player]+" · Game setup";
+  document.getElementById("steps").innerHTML="";
+  hub.disabled=true;
+  const btn=(act,txt,more,cls)=>`<button class="btn ${cls||"primary"}" data-act="${act}" ${more||""}>${txt}</button>`;
+  const done=S().setup;let h="";const _P=S(),contLabel=_P.streak>0?`▶️ Continue (🔥 ${_P.streak} win${_P.streak>1?"s":""})`:_P.lossStreak>0?`▶️ Continue (🤡 ${_P.lossStreak} loss${_P.lossStreak>1?"es":""})`:"▶️ Continue (keep my record)";
+  if(suStage==="count"){
+    const win=suTrack==="win";
+    h=`<p class="landed">${win?"🔥 Winning streak":"🤡 Losing streak"}</p><h2>How many ${win?"wins":"losses"} in a row?</h2><p>Your streak starts at this number and keeps counting. Milestone events you've already passed won't replay.</p><div class="rwnum">${[1,2,3,4,5,6,7,8].map(n=>btn("suapply",n,`data-n="${n}"`)).join("")}</div><input id="suN" class="rwin" type="number" inputmode="numeric" min="1" max="50" placeholder="Or type a number (1 to 50)"><div class="btns">${btn("suapply","Set my streak",'data-n=""')}${btn("suback","Back","","")}</div>`;
+  }else if(suStage==="new"){
+    h=`<p class="landed">🆕 New game</p><h2>Reset everything to 0?</h2><p>This clears all spins, streaks, cooldowns, rewards, punishments, history and the week count. It can't be undone.</p><div class="btns">${btn("sunewgo","Yes, reset everything")}${btn("suback","Cancel","","")}</div>`;
+  }else{
+    h=`<p class="landed">🏈 ${done?"Update your record":"Before you start"}</p><h2>Where are you right now?</h2><p>Are you on a streak? Tell me, and I'll pick up from there.</p><div class="btns col">${btn("suwin","🔥 On a winning streak")}${btn("sulose","🤡 On a losing streak")}${btn("suneither","😐 Neither (start at 0)")}${btn("sunew","🆕 New game: reset everything to 0","","")}${btn("sucontinue",contLabel,"","")}</div>`;
+  }
+  panel.innerHTML=h;
+}
+function suFinish(msg){setupOpen=false;suStage="pick";suTrack=null;pushPlayer(player);newRound();if(msg)toast(msg);}
+function suAct(a,b){
+  if(round.step!=="wl"&&!(setupOpen||!S().setup))return;
+  const P=S();
+  if(a==="suopen"){if(round.step!=="wl"||spinning||P.curse){toast("Finish the current game first.");return;}setupOpen=true;suStage="pick";render();}
+  else if(a==="suwin"||a==="sulose"){suTrack=a==="suwin"?"win":"lose";suStage="count";render();}
+  else if(a==="suneither"){P.seed={track:"none",n:0,at:Date.now()};P.setup=true;derive(P);suFinish("Starting fresh: no streak.");}
+  else if(a==="suback"){suStage="pick";render();}
+  else if(a==="suclose"){setupOpen=false;suStage="pick";render();}
+  else if(a==="sucontinue"){if(!P.setup){P.setup=true;pushPlayer(player);}setupOpen=false;suStage="pick";suTrack=null;render();}
+  else if(a==="sunew"){suStage="new";render();}
+  else if(a==="sunewgo"){
+    P.newGameAt=Date.now();P.seed=null;P.fired=[];P.week=0;P.curse=null;P.curseLog=[];P.resetAt={win:0,lose:0};
+    P.rewards={tokens:[],hist:[]};P.dp={hist:[],lockUntil:0};P.setup=true;derive(P);
+    suFinish("New game started. Everything is at 0.");
+  }
+  else if(a==="suapply"){
+    let n=b.dataset.n===""?parseInt((document.getElementById("suN")||{}).value,10):parseInt(b.dataset.n,10);
+    if(!(n>=1&&n<=50)){toast("Enter a number from 1 to 50.");return;}
+    P.seed={track:suTrack,n,at:Date.now()};P.setup=true;derive(P);
+    suFinish("Streak set: "+n+(suTrack==="win"?" wins":" losses")+" in a row.");
+  }
+}
+document.getElementById("streakBox").addEventListener("click",e=>{const b=e.target.closest("button[data-act=suopen]");if(b)suAct("suopen",b);});
 function newRound(){round={step:"wl",track:null,cat:null,pos:null,n:0,slot:0};if(S().curse){resumeCurse();return;}setItems(catItems(null));render();}
 
 /* ---------- hot streak curse ---------- */
@@ -1086,7 +1165,7 @@ function resumeCurse(){
   render();
 }
 function curseWarning(){
-  const C=S().curse,lv=C.level||1,I=LV.curse[lv];
+  const C=S().curse;if(!C||C.kind!=="curse")return;const lv=C.level||1,I=LV.curse[lv];
   ov.hidden=false;ov.className="curse warn"+(lv>=4?" black":"");
   ov.innerHTML=`<div class="cv">${lv>1?`<div class="lvbig">LEVEL ${lv}</div>`:""}<div class="warnsign">⚠️ ${I.title} ⚠️</div><p class="cq">“${I.quote}”</p></div>`;
   shake(ov.querySelector(".cv"));shake(wrapEl);
@@ -1104,12 +1183,12 @@ function curseWarning(){
       const b=document.createElement("button");b.className="btn primary";b.textContent="Face the wheel";
       b.onclick=()=>{ov.hidden=true;ov.innerHTML="";round={step:"poison",track:null,cat:null,pos:null,n:0,slot:0};setItems(poisonItems());render();
         const w=document.querySelector(".wheelwrap");w.classList.remove("emerge");void w.offsetWidth;w.classList.add("emerge");};
-      ov.querySelector(".cv").appendChild(b);b.focus();b.scrollIntoView({block:"nearest"});
+      const cv2=ov.querySelector(".cv");if(!cv2)return;cv2.appendChild(b);b.focus();b.scrollIntoView({block:"nearest"});
     });
   });
 }
 function blessIntro(){
-  const C=S().curse,lv=C.level||1,I=LV.bless[lv];
+  const C=S().curse;if(!C||C.kind!=="bless")return;const lv=C.level||1,I=LV.bless[lv];
   wrapEl.classList.add("frozen");sfx.trombone();if(lv>=4)setTimeout(()=>sfx.heartbeat(3),600);
   ov.hidden=false;ov.className="curse bless fade";ov.innerHTML="";
   later(2600,()=>{ov.className="curse bless dark";
@@ -1117,7 +1196,7 @@ function blessIntro(){
     ov.innerHTML=`<div class="cv">${lv>1?`<div class="lvbig gold">LEVEL ${lv}</div>`:""}<div class="suck">🤡 ${I.title} 🤡</div><p class="cq">“${I.quote}”</p>${ex}<div class="emerg" id="emerg">${I.emerg}</div></div>`;
     sfx.thud();if(lv>=3)setTimeout(()=>sfx.choir(),500);});
   later(5000,()=>{const e=document.getElementById("emerg");if(e)e.classList.add("on");shake(ov.querySelector(".cv"),"shakeSoft");if(lv<3)sfx.alarm();});
-  later(6600,()=>{confetti(lv>=4?6000:4200,true);const cv=ov.querySelector(".cv");
+  later(6600,()=>{confetti(lv>=4?6000:4200,true);const cv=ov.querySelector(".cv");if(!cv)return;
     const q=document.createElement("p");q.className="cq champ";q.textContent="“"+I.champ+"”";cv.appendChild(q);
     later(1600,()=>{const b=document.createElement("button");b.className="btn primary goldbtn";b.textContent="Spin the miracle wheel";
       b.onclick=()=>{ov.hidden=true;ov.innerHTML="";wrapEl.classList.remove("frozen");round={step:"poison",track:null,cat:null,pos:null,n:0,slot:0};setItems(poisonItems());render();
@@ -1207,6 +1286,7 @@ panel.addEventListener("click",e=>{
   else if(a==="cursespin")startCurseSpin();
   else if(a==="cursefinal"){round.curse=false;round.step="curseDone";render();}
   else if(a==="demise"){const C=S().curse;if(C&&C.chosen==null){C.chosen=+b.dataset.i;pushPlayer(player);render();}}
+  else if(a.indexOf("su")===0)suAct(a,b);
   else if(a.indexOf("rw")===0||a.indexOf("dp")===0)rwAct(a,b);
   else if(a==="curseshort"){const C=S().curse;if(C&&C.type){C.short=Math.max(0,needOf(OPTS[C.type])-C.picks.length);pushPlayer(player);round.step="curseDone";render();}}
   else if(a==="fate"){b.disabled=true;acceptFate();}
@@ -1228,10 +1308,10 @@ function card(p,k){
 function renderStreak(){
   const el=document.getElementById("streakBox");if(!el)return;
   const P=S(),hot=P.streak>0,n=hot?P.streak:P.lossStreak;
-  if(!n){el.className="streakbox";el.innerHTML=`<p class="sbtitle">No streak yet</p><p class="sbnext">First milestone: 3 straight wins (curse) or 3 straight losses (miracle)</p>`;return;}
+  if(!n){el.className="streakbox";el.innerHTML=`<p class="sbtitle">No streak yet</p><p class="sbnext">First milestone: 3 straight wins (curse) or 3 straight losses (miracle)</p><button class="reset" data-act="suopen">Update my record / New game</button>`;return;}
   const nm=nextMs(n),pm=prevMs(n),lv=levelOf(nm),pct=Math.max(2,Math.round(100*(n-pm)/(nm-pm)));
   el.className="streakbox "+(hot?"hot ":"cold ")+(n>=10?"i4":n>=7?"i3":n>=5?"i2":n>=3?"i1":"i0");
-  el.innerHTML=`<p class="sbtitle">${hot?"🔥 CURRENT WIN STREAK: ":"🤡 CURRENT LOSS STREAK: "}${n}</p><p class="sbnext">${hot?"NEXT CURSE":"NEXT MIRACLE"}: LEVEL ${lv}${lv===4?" (MAX)":""} AT ${nm} ${hot?"WINS":"LOSSES"}</p><div class="sbbar"><i style="width:${pct}%"></i></div>`;
+  el.innerHTML=`<p class="sbtitle">${hot?"🔥 CURRENT WIN STREAK: ":"🤡 CURRENT LOSS STREAK: "}${n}</p><p class="sbnext">${hot?"NEXT CURSE":"NEXT MIRACLE"}: LEVEL ${lv}${lv===4?" (MAX)":""} AT ${nm} ${hot?"WINS":"LOSSES"}</p><div class="sbbar"><i style="width:${pct}%"></i></div><button class="reset" data-act="suopen">Update my record / New game</button>`;
 }
 function renderLedger(){try{renderTokens();renderDpBox();renderStreak();}catch(e){}
   const order=[player,...PLAYERS.filter(p=>p!==player)];
